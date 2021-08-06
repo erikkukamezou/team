@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 
       resources :users, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
       end
+    end
   
   resources :teams do
     resources :assigns, only: %w(create destroy)

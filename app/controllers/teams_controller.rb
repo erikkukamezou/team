@@ -1,6 +1,7 @@
 class TeamsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_team, only: %i[show edit update destroy]
+  
 
   def index
     @teams = Team.all
@@ -39,8 +40,12 @@ class TeamsController < ApplicationController
   end
 
   def destroy
-    @team.destroy
-    redirect_to teams_url, notice: I18n.t('views.messages.delete_team')
+    
+    if @user == current_user or admin_user
+     @team.destroy
+     redirect_to teams_url, notice: I18n.t('views.messages.delete_team')
+     else render :show
+    end
   end
 
   def dashboard
@@ -56,4 +61,6 @@ class TeamsController < ApplicationController
   def team_params
     params.fetch(:team, {}).permit %i[name icon icon_cache owner_id keep_team_id]
   end
+  
+  
 end

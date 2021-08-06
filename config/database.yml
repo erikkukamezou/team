@@ -89,5 +89,5 @@ test:
 production:
   <<: *default
   database: diveintopost_production
-  username: diveintopos
+  username: diveintopost
   password: <%= ENV['KEIJIBAN_DATABASE_PASSWORD'] %>
