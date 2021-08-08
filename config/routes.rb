@@ -8,6 +8,11 @@ Rails.application.routes.draw do
     passwords: 'users/passwords'
   }
   resource :user
+    #   namespace :admin do
+
+    #   resources :users, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+    #   end
+    # end
   
   resources :teams do
     resources :assigns, only: %w(create destroy)
@@ -15,6 +20,9 @@ Rails.application.routes.draw do
       resources :articles do
         resources :comments
       end
+    end
+    member do
+      patch :change_owner
     end
   end
 
