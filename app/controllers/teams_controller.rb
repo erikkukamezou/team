@@ -1,6 +1,7 @@
 class TeamsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_team, only: %i[show edit update destroy]
+  before_action :set_team, only: %i[show edit update destroy change_owner]
+  
 
   def index
     @teams = Team.all
@@ -15,7 +16,11 @@ class TeamsController < ApplicationController
     @team = Team.new
   end
 
-  def edit; end
+  def edit
+    if @team.owner != current_user
+      redirect_to teams_url, notice: I18n.t('views.messages.cannot_edit_create_team')
+    end
+  end
 
   def create
     @team = Team.new(team_params)
@@ -39,12 +44,35 @@ class TeamsController < ApplicationController
   end
 
   def destroy
-    @team.destroy
-    redirect_to teams_url, notice: I18n.t('views.messages.delete_team')
+    
+    if @user == current_user or admin_user
+     @team.destroy
+     
+     redirect_to teams_url, notice: I18n.t('views.messages.delete_team')
+    else render :show
+    end
   end
 
   def dashboard
     @team = current_user.keep_team_id ? Team.find(current_user.keep_team_id) : current_user.teams.first
+  end
+  
+  # def change_authority
+  #   @team.update(owner_id: params[:owner_id])
+  #   @user = User.find(@team.owner_id)
+  #   # binding.irb
+  #   ChangeAuthorityMailer.change_authority_mail(@user).deliver
+  #   redirect_to team_path, notice: 'You have successfully change the authority'
+  # end
+  
+  def change_owner
+    if @team.update(owner_id: params[:owner_id])
+      ChangeOwnerMailer.change_owner_mail(@team.owner).deliver
+      redirect_to @team, notice: I18n.t('views.messages.change_owner')
+    else
+      flash.now[:error] = I18n.t('views.messages.failed_to_save_team')
+      render @team
+    end
   end
 
   private
@@ -56,4 +84,6 @@ class TeamsController < ApplicationController
   def team_params
     params.fetch(:team, {}).permit %i[name icon icon_cache owner_id keep_team_id]
   end
+  
+  
 end
